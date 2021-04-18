@@ -3,7 +3,6 @@ import database
 
 def deposit_operation(user):
     print("Deposit Operations")
-    print(user)
 
     # get current balance
     current_balance = get_current_balance(user)
@@ -34,7 +33,6 @@ def deposit_operation(user):
 
 def withdrawal_operation(user):
     print("withdrawal")
-    print(user)
 
     # get current balance
     current_balance = get_current_balance(user)
