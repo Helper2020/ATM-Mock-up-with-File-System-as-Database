@@ -13,6 +13,8 @@
 import random
 import validation
 import database
+import bankoperations
+
 from getpass import getpass
 
 
@@ -43,15 +45,19 @@ def login():
 
     if is_valid_account_number:
 
-        password = getpass("What is your password \n")
+        password = input("What is your password \n")
 
-        user = database.authenticated_user(account_number_from_user, password);
+        user = database.authenticated_user(account_number_from_user, password)
 
         if user:
+            # Start session
+            database.start_session(user)
             bank_operation(user)
-
-        print('Invalid account or password')
-        login()
+            # End session
+            database.end_session(user)
+        else:
+            print('Invalid account or password')
+            login()
 
     else:
         print("Account Number Invalid: check that you have up to 10 digits and only integers")
@@ -64,7 +70,7 @@ def register():
     email = input("What is your email address? \n")
     first_name = input("What is your first name? \n")
     last_name = input("What is your last name? \n")
-    password = getpass("Create a password for yourself \n")
+    password = input("Create a password for yourself \n")
 
     account_number = generation_account_number()
 
@@ -92,49 +98,23 @@ def bank_operation(user):
 
     if selected_option == 1:
 
-        deposit_operation()
+        bankoperations.deposit_operation(user)
     elif selected_option == 2:
 
-        withdrawal_operation()
+        bankoperations.withdrawal_operation(user)
     elif selected_option == 3:
-
+        database.end_session(user)
         logout()
     elif selected_option == 4:
-
+        database.end_session(user)
         exit()
     else:
-
         print("Invalid option selected")
         bank_operation(user)
 
 
-def withdrawal_operation():
-    print("withdrawal")
-    # get current balance
-    # get amount to withdraw
-    # check if current balance > withdraw balance
-    # deduct withdrawn amount form current balance
-    # display current balance
-
-
-def deposit_operation():
-    print("Deposit Operations")
-    # get current balance
-    # get amount to deposit
-    # add deposited amount to current balance
-    # display current balance
-
-
 def generation_account_number():
     return random.randrange(1111111111, 9999999999)
-
-
-def set_current_balance(user_details, balance):
-    user_details[4] = balance
-
-
-def get_current_balance(user_details):
-    return user_details[4]
 
 
 def logout():

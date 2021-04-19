@@ -8,22 +8,23 @@
 
 import os
 import validation
+import datetime
 
 user_db_path = "data/user_record/"
+user_db_path_time = "data/auth_session/"
 
 
 def create(user_account_number, first_name, last_name, email, password):
-
     # create a file
     # name of the file would be account_number.txt
     # add the user details to the file
     # return true
     # if saving to file fails, then deleted created file
 
-    user_data = first_name + "," + last_name + "," + email + "," + password + "," + str(0)
+    user_data = first_name + "," + last_name + "," + email + "," + password + "," + str(
+        user_account_number) + "," + str(0)
 
     if does_account_number_exist(user_account_number):
-
         return False
 
     if does_email_exist(email):
@@ -44,17 +45,16 @@ def create(user_account_number, first_name, last_name, email, password):
 
     else:
 
-        f.write(str(user_data));
+        f.write(str(user_data))
         completion_state = True
 
     finally:
 
-        f.close();
+        f.close()
         return completion_state
 
 
 def read(user_account_number):
-
     # find user with account number
     # fetch content of the file
     is_valid_account_number = validation.account_number_validation(user_account_number)
@@ -94,8 +94,31 @@ def update(user_account_number):
     # return true
 
 
-def delete(user_account_number):
+def update_balance(user):
+    completion_state = False
+    try:
+        f = open(user_db_path + user[4] + ".txt", "w")
+        f.write(','.join(user))
+        completion_state = True
 
+    except FileNotFoundError:
+
+        print("User not found")
+
+    except FileExistsError:
+
+        print("User doesn't exist")
+
+    except TypeError:
+
+        print("Invalid account number format")
+
+    finally:
+        f.close()
+        return completion_state
+
+
+def delete(user_account_number):
     # find user with account number
     # delete the user record (file)
     # return true
@@ -119,7 +142,6 @@ def delete(user_account_number):
 
 
 def does_email_exist(email):
-
     all_users = os.listdir(user_db_path)
 
     for user in all_users:
@@ -130,20 +152,17 @@ def does_email_exist(email):
 
 
 def does_account_number_exist(account_number):
-
     all_users = os.listdir(user_db_path)
 
     for user in all_users:
 
         if user == str(account_number) + ".txt":
-
             return True
 
     return False
 
 
 def authenticated_user(account_number, password):
-
     if does_account_number_exist(account_number):
 
         user = str.split(read(account_number), ',')
@@ -154,3 +173,28 @@ def authenticated_user(account_number, password):
     return False
 
 
+def start_session(user):
+    # Get current time
+    current_time = get_current_time()
+
+    # Create full file path
+    file_name = user_db_path_time + user[4] + "-session.txt"
+
+    # Create and log start of session.
+    try:
+        f = open(file_name, 'x')
+        f.write('Account# ' + user[4] + ', ' + 'Log Time: ' + current_time)
+        f.close()
+    except FileExistsError:  # If file exists, user is logged on.
+        print("Contact tech support. User is already logged on.")
+        exit()
+
+
+def end_session(user):
+    file_name = user_db_path_time + user[4] + "-session.txt"
+
+    os.remove(file_name)
+
+
+def get_current_time():
+    return datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
